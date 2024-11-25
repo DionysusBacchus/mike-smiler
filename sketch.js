@@ -20,6 +20,52 @@ function help(){
   text('Press "f" to upload a MIDI file', width / 2, lineGap * 4);
 }
 
+const fadeCoef = 5;
+
+class Note {
+  constructor(note, velocity ) {
+    this.id = note;
+    this.pos = createVector(width/2, height/2);
+    this.vel = createVector(random(-1, 1), random(-1, 1));
+    this.speed = map(velocity, 0, 127, 1, 5);
+    this.vel.mag(this.speed);
+    this.silent = false;
+    this.fade = -1;
+  }
+
+  update() {
+    if (this.silent) return;
+    this.pos.add(this.vel);
+    if (this.isFading() ) {
+      this.fade -= fadeCoef;
+      if (this.fade <= 0){
+        this.silent = true;
+      }
+    }
+  }
+
+  draw() {
+    if (this.silent) return;
+    push();
+    if (this.isFading()) {
+      fill(0, this.fade/100);
+    }
+    ellipse(this.pos.x, this.pos.y, 10, 10);
+    pop();
+  }
+
+  makeSilent() {
+    if (sustain) return;
+    this.fade = 100;
+  }
+
+  isFading() {
+    return this.fade > 0;
+  }
+}
+
+let notes = [];
+
 function setup() {
   createCanvas(400, 400);
 
@@ -27,6 +73,8 @@ function setup() {
   textSize(16);
   textAlign(CENTER, CENTER);
   fill(0);
+  noStroke();
+  colorMode(HSL)
 
   if (navigator.requestMIDIAccess) {
     navigator.requestMIDIAccess({ sysex: true })
@@ -52,6 +100,16 @@ function onMIDIFailure(error) {
   liveText = 'Failed to access MIDI devices.'+liveError;
 }
 
+let sustain = false;
+function removeNote(id){
+  n = notes.find(n => {
+    return n.id === id && !n.isFading() && !n.silent;
+  });
+  if(n){
+    n.makeSilent();
+  }
+}
+
 function handleMIDIMessage(event) {
 
   // note range 28-103
@@ -64,19 +122,26 @@ function handleMIDIMessage(event) {
         return;
       
       case 176:
-        // Pedal
-        // velocity 127 => on 
-        // velocity 0 => off
-        // note 64
-        // break;
+        if (velocity === 0) {
+          sustain = false;
+          notes.forEach(n => n.makeSilent());
+          return;
+        }
+        if (note === 64) {
+          sustain = true;
+        }
+        break;
       case 144: // Note On
           if (velocity > 0) {
-              console.log(`Note On: ${note} Velocity: ${velocity}`);
+            notes.push(new Note(note, velocity));
+            console.log(`Note On: ${note} Velocity: ${velocity}`);
           } else {
-              console.log(`Note Off: ${note}`);
+            removeNote(note);
+            console.log(`Note Off: ${note}`);
           }
           break;
       case 128: // Note Off
+          removeNote(note);
           console.log(`Note Off: ${note}`);
           break;
       default:
@@ -98,7 +163,7 @@ function playFromFile(){
     return;
   }
   push()
-  background(50);
+  background(0,80,0);
   fill(255);
   let track = midi.tracks[0];
   let end = track.endOfTrackTicks;
@@ -133,13 +198,19 @@ function playFromFile(){
 }
 
 function draw() {
-  background(220)
+  background(0,0,100);
   if(toggleHelp){
     help();
   }
   text("H", width-10, 15);
   if(show){
     playFromFile();
+  }
+  notes = notes.filter(n => !n.silent);
+  for (let note of notes) {
+
+    note.draw();
+    note.update();
   }
 }
 let tmp =0;
@@ -155,6 +226,9 @@ function keyPressed() {
   }
   if (key === 'h' || key === 'H') {
     toggleHelp = !toggleHelp;
+  }
+  if (key === 'c' || key === 'C') {
+    notes = [];
   }
 }
 
