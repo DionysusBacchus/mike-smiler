@@ -3,7 +3,7 @@ let fileInput;
 
 let show = false;
 let start;
-let toggleHelp = true;
+let toggleHelp = false;
 
 let liveText;
 const liveError = '\nCan\'t start the live stream mode!';
@@ -20,17 +20,37 @@ function help(){
   text('Press "f" to upload a MIDI file', width / 2, lineGap * 4);
 }
 
-const fadeCoef = 5;
+const fadeCoef = 1;
+
+// const speedCoef = 
+
+const speedSensitivity = -0.1;
+const speedOffset = 1;
+
+const sizeSensitivity = 0.1;
+const sizeOffset = 1;
 
 class Note {
   constructor(note, velocity ) {
     this.id = note;
     this.pos = createVector(width/2, height/2);
     this.vel = createVector(random(-1, 1), random(-1, 1));
-    this.speed = map(velocity, 0, 127, 1, 5);
-    this.vel.mag(this.speed);
+
+
+    this.speed = speedOffset + speedSensitivity * velocity;
+    this.size = sizeOffset + sizeSensitivity * velocity;
+
+
+    this.vel.setMag(this.speed);
     this.silent = false;
     this.fade = -1;
+
+    const n = note - 28;
+
+    const interval = 12;
+
+    this.hue = map(n%interval, 0, interval-1, 200, 360);
+    this.value = map(Math.round(n/12), 0, 6, 20, 80);
   }
 
   update() {
@@ -42,19 +62,28 @@ class Note {
         this.silent = true;
       }
     }
+    if (sustain){
+      this.size = max(this.size - 0.01, 0);
+      if (this.size <= 0){
+        this.silent = true;
+      }
+    }
   }
 
   draw() {
     if (this.silent) return;
     push();
+    let c = color(this.hue, 80, this.value);
     if (this.isFading()) {
-      fill(0, this.fade/100);
+      c.setAlpha(this.fade/100);
     }
-    ellipse(this.pos.x, this.pos.y, 10, 10);
+    fill(c);
+    circle(this.pos.x, this.pos.y, 10 * this.size);
     pop();
   }
 
   makeSilent() {
+    // todo on sustain off -> on all notes regain full alpha
     if (sustain) return;
     this.fade = 100;
   }
@@ -64,17 +93,19 @@ class Note {
   }
 }
 
-let notes = [];
-
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(windowWidth, windowHeight);
 
   lineGap = height / 5;
   textSize(16);
   textAlign(CENTER, CENTER);
-  fill(0);
+  fill(100,100,100);
   noStroke();
   colorMode(HSL)
+
+  speedRange = createVector(1, 5);
+  sizeRange = createVector(1, 8);
+  notes = [];
 
   if (navigator.requestMIDIAccess) {
     navigator.requestMIDIAccess({ sysex: true })
@@ -134,15 +165,15 @@ function handleMIDIMessage(event) {
       case 144: // Note On
           if (velocity > 0) {
             notes.push(new Note(note, velocity));
-            console.log(`Note On: ${note} Velocity: ${velocity}`);
+            //console.log(`Note On: ${note} Velocity: ${velocity}`);
           } else {
             removeNote(note);
-            console.log(`Note Off: ${note}`);
+            //console.log(`Note Off: ${note}`);
           }
           break;
       case 128: // Note Off
           removeNote(note);
-          console.log(`Note Off: ${note}`);
+          //console.log(`Note Off: ${note}`);
           break;
       default:
           console.log(`Command: ${command} Note: ${note} Velocity: ${velocity}`);
@@ -198,7 +229,7 @@ function playFromFile(){
 }
 
 function draw() {
-  background(0,0,100);
+  background(0,0,0);
   if(toggleHelp){
     help();
   }
