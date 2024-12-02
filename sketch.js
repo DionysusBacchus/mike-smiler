@@ -19,82 +19,10 @@ function help(){
   text('Press "f" to upload a MIDI file', width / 2, lineGap * 4);
 }
 
-const fadeCoef = 1;
-
-// const speedCoef = 
-
-const speedSensitivity = -0.1;
-const speedOffset = 1;
-
-const sizeSensitivity = 0.1;
-const sizeOffset = 1;
-
-class Note {
-  constructor(note, velocity, id ) {
-    this.note = note;
-    this.id = id?? note;
-    this.pos = createVector(width/2, height/2);
-    this.vel = createVector(random(-1, 1), random(-1, 1));
-
-
-    this.speed = speedOffset + speedSensitivity * velocity;
-    this.size = sizeOffset + sizeSensitivity * velocity;
-
-
-    this.vel.setMag(this.speed);
-    this.silent = false;
-    this.fade = -1;
-
-    const n = note - 28;
-
-    const interval = 12;
-
-    this.hue = map(n%interval, 0, interval-1, 200, 360);
-    this.value = map(Math.round(n/12), 0, 6, 20, 80);
-  }
-
-  update() {
-    if (this.silent) return;
-    this.pos.add(this.vel);
-    if (this.isFading() ) {
-      this.fade -= fadeCoef;
-      if (this.fade <= 0){
-        this.silent = true;
-      }
-    }
-    if (sustain){
-      this.size = max(this.size - 0.01, 0);
-      if (this.size <= 0){
-        this.silent = true;
-      }
-    }
-  }
-
-  draw() {
-    if (this.silent) return;
-    push();
-    let c = color(this.hue, 80, this.value);
-    if (this.isFading()) {
-      c.setAlpha(this.fade/100);
-    }
-    fill(c);
-    circle(this.pos.x, this.pos.y, 10 * this.size);
-    pop();
-  }
-
-  makeSilent() {
-    // todo on sustain off -> on all notes regain full alpha
-    if (sustain) return;
-    this.fade = 100;
-  }
-
-  isFading() {
-    return this.fade > 0;
-  }
-}
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  rectMode(CENTER);
 
   lineGap = height / 5;
   textSize(16);
@@ -165,27 +93,16 @@ function handleMIDIMessage(event) {
       case 144: // Note On
           if (velocity > 0) {
             notes.push(new Note(note, velocity));
-            //console.log(`Note On: ${note} Velocity: ${velocity}`);
           } else {
             removeNote(note);
-            //console.log(`Note Off: ${note}`);
           }
           break;
       case 128: // Note Off
           removeNote(note);
-          //console.log(`Note Off: ${note}`);
           break;
       default:
           console.log(`Command: ${command} Note: ${note} Velocity: ${velocity}`);
     }
-  
-
-  // Example: Draw a circle based on velocity (data2)
-  // let x = random(width);
-  // let y = random(height);
-  // let size = map(data, 0, 127, 10, 100);
-
-  // ellipse(x, y, size);
 }
 let tick = 0;
 let nn = [];
