@@ -1,4 +1,4 @@
-const fadeCoef = 1;
+const fadeCoef = 0.5;
 
 const speedSensitivity = -0.05;
 const speedOffset = 1;
@@ -65,7 +65,7 @@ class Note {
         }
         console.log(this.note)
         console.log(octave)
-        this.value = map(this.note%interval, 0, interval-1, 20, 80);
+        this.value = map(this.note%interval, 0, interval-1, 50, 80);
     }
   
     update() {
@@ -78,7 +78,7 @@ class Note {
         }
       }
       if (sustain){
-        this.size = max(this.size - 0.003, 0);
+        this.size = max(this.size - 0.01, 0);
         if (this.size <= 0){
           this.silent = true;
         }
@@ -94,10 +94,10 @@ class Note {
       }
       fill(c);
       if (this.note > 36){
-        this.drawSquare()
+        this.drawCircle()
       }
       else{
-        this.drawCircle()
+        this.drawSquare()
       }
       pop();
     }
@@ -107,7 +107,7 @@ class Note {
     }
   
     drawSquare(){
-      square(this.pos.x, this.pos.y, 10 * this.size);
+      rect(this.pos.x, this.pos.y, 10 * this.size, 10 * this.size, 10);
     }
   
     makeSilent() {
