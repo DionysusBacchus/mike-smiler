@@ -116,6 +116,7 @@ function playFromFile(){
   if (tick > end){
     show = false;
     tick = 0;
+    notes.forEach(n => n.makeSilent());
   }
   push()
   fill(30, 50, 50);
