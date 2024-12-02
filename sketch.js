@@ -2,7 +2,6 @@ let midi; // Store the loaded MIDI object
 let fileInput;
 
 let show = false;
-let start;
 let toggleHelp = false;
 
 let liveText;
@@ -31,8 +30,9 @@ const sizeSensitivity = 0.1;
 const sizeOffset = 1;
 
 class Note {
-  constructor(note, velocity ) {
-    this.id = note;
+  constructor(note, velocity, id ) {
+    this.note = note;
+    this.id = id?? note;
     this.pos = createVector(width/2, height/2);
     this.vel = createVector(random(-1, 1), random(-1, 1));
 
@@ -187,43 +187,34 @@ function handleMIDIMessage(event) {
 
   // ellipse(x, y, size);
 }
-
+let tick = 0;
+let nn = [];
+let end;
 function playFromFile(){
   if(!midi || !show) {
     help();
     return;
   }
-  push()
-  background(0,80,0);
-  fill(255);
-  let track = midi.tracks[0];
-  let end = track.endOfTrackTicks;
-  if (start > end){
-    show = false;
-    console.log(millis()-tmp)
-  }
   
-  let notes = track.notes;
-  //text(midi.tracks.length, width / 2, height / 2)
-  for (let i = 0; i < notes.length; i++) {
-    const note = notes[i];
-    const tick = start;
-    
-    if(tick > note.ticks && tick < note.ticks + note.durationTicks){
-      console.log(note)
-      let x = map(i, 0, notes.length, 0, width);
-      let y = map(notes[i].midi, 0, 127, height, 0);
-      ellipse(x, y, 10, 10);
-
+  if (tick > end){
+    show = false;
+    tick = 0;
+  }
+  push()
+  fill(30, 50, 50);
+  for (let i = 0; i < nn.length; i++) {
+    const note = nn[i];
+    if (note.ticks <= tick && tick <= note.ticks + note.durationTicks){
+      const there = notes.find(n => n.id === i);
+      if (!there){
+        notes.push(new Note(note.midi, note.velocity*128, i));
+      }
+      
     }
-
-
-    // let dur = (note.durationTicks+note.ticks)*factor;
-    // if ((millis() - start)/factor < dur ){
-    //   console.log(note.midi)
-    // }
-    
-    start+=factor;
+    if (note.ticks + note.durationTicks <= tick){
+      removeNote(i);
+    }
+    tick+=factor;
   }
   pop()
 }
@@ -249,7 +240,6 @@ let tmp =0;
 function keyPressed() {
   if (key === 's') {
     show = !show;
-    start = 0;
     tmp = millis()
   }
   if (key === 'f' || key === 'F') {
@@ -278,7 +268,10 @@ async function handleFile(file) {
     const data = await response.arrayBuffer();
 
     midi = new Midi(data); // Parse MIDI file
-    console.log(midi); // Inspect the MIDI object
+    let track = midi.tracks[0];
+    end = track.endOfTrackTicks;
+    nn = track.notes;
+    //console.log(midi); // Inspect the MIDI object
   } else {
     console.log('Please upload a valid MIDI file.');
   }
