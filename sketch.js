@@ -107,6 +107,7 @@ function handleMIDIMessage(event) {
 let tick = 0;
 let nn = [];
 let end;
+let sus = [];
 function playFromFile(){
   if(!midi || !show) {
     help();
@@ -120,19 +121,28 @@ function playFromFile(){
   }
   push()
   fill(30, 50, 50);
+  //console.log(tick)
   for (let i = 0; i < nn.length; i++) {
     const note = nn[i];
-    if (note.ticks <= tick && tick <= note.ticks + note.durationTicks){
+    if (tick <= note.ticks + note.durationTicks && tick >= note.ticks){
+      //console.log(note.ticks)
       const there = notes.find(n => n.id === i);
       if (!there){
         notes.push(new Note(note.midi, note.velocity*128, i));
       }
       
     }
-    if (note.ticks + note.durationTicks <= tick){
+    if (tick > note.ticks + note.durationTicks){
       removeNote(i);
+      //nn.splice(i, 1);
     }
-    tick+=factor;
+    // todo calculate persise factor
+    tick+=0.025;
+  }
+  if(sus[0] && tick >= sus[0].ticks){
+    sustain = sus[0].value === 0? false : true;
+    //console.log(sus[0].ticks)
+    sus.shift()
   }
   pop()
 }
@@ -189,7 +199,9 @@ async function handleFile(file) {
     let track = midi.tracks[0];
     end = track.endOfTrackTicks;
     nn = track.notes;
-    //console.log(midi); // Inspect the MIDI object
+    sus = JSON.parse(JSON.stringify( track.controlChanges))["64"]
+    console.log(sus)
+    console.log(midi); // Inspect the MIDI object
   } else {
     console.log('Please upload a valid MIDI file.');
   }
