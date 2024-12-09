@@ -72,6 +72,7 @@ function removeNote(id){
 function handleMIDIMessage(event) {
 
   // note range 28-103
+  // note range 48-72
 
   const [command, note, velocity] = event.data;
 
@@ -81,6 +82,7 @@ function handleMIDIMessage(event) {
         return;
       
       case 176:
+        case 177:
         if (velocity === 0) {
           sustain = false;
           notes.forEach(n => n.makeSilent());
@@ -91,6 +93,7 @@ function handleMIDIMessage(event) {
         }
         break;
       case 144: // Note On
+      case 145:
           if (velocity > 0) {
             notes.push(new Note(note, velocity));
           } else {
@@ -98,6 +101,7 @@ function handleMIDIMessage(event) {
           }
           break;
       case 128: // Note Off
+      case 129:
           removeNote(note);
           break;
       default:
@@ -139,7 +143,7 @@ function playFromFile(){
     // todo calculate persise factor
     tick+=0.025;
   }
-  if(sus[0] && tick >= sus[0].ticks){
+  if(sus && sus[0] && tick >= sus[0].ticks){
     sustain = sus[0].value === 0? false : true;
     //console.log(sus[0].ticks)
     sus.shift()
