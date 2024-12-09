@@ -6,13 +6,12 @@ const speedOffset = 1;
 const sizeSensitivity = 0.1;
 const sizeOffset = 1;
 
-const positionSensitivity = 1.5;
-const positionOffset = 2;
+const positionSensitivity = 7;
+const positionOffset = -5;
 
 class Note {
   static interval = 12;
     constructor(note, velocity, id ) {
-      console.log(note)
       this.note = (note - 28)+4;
       this.id = id?? note;
       
@@ -20,6 +19,7 @@ class Note {
 
       this.pos = createVector(width/2, height/2);
       const offset = -(this.note*positionSensitivity)+positionOffset;
+      console.log(offset)
       this.pos.add(p5.Vector.setMag(this.vel, offset))
 
       this.speed = speedOffset + speedSensitivity * velocity;
@@ -66,7 +66,7 @@ class Note {
   
     update() {
       if (this.silent) return;
-      this.pos.add(this.vel);
+      this.updatePos()
       if (this.isFading() ) {
         this.fade -= fadeCoef;
         if (this.fade <= 0){
@@ -79,6 +79,25 @@ class Note {
           this.silent = true;
         }
       }
+    }
+
+    updatePos(){
+      const d = this.pos.dist(createVector(width/2, height/2));
+      if(d < width/3){
+const nScale = 0.005
+      
+      let dx = nScale*this.pos.x
+      let dy = nScale*this.pos.y
+      
+      let nValue = noise(dx, dy,(-millis()/3000)%12)
+      
+      let ang = nValue * TWO_PI
+      
+      this.pos.add(p5.Vector.fromAngle(ang).setMag(this.speed))
+      }
+      else this.pos.add(this.vel);
+      
+      
     }
   
     draw() {
