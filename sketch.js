@@ -126,11 +126,9 @@ function playFromFile(){
   }
   push()
   fill(30, 50, 50);
-  //console.log(tick)
   for (let i = 0; i < nn.length; i++) {
     const note = nn[i];
     if (tick <= note.ticks + note.durationTicks && tick >= note.ticks){
-      //console.log(note.ticks)
       const there = notes.find(n => n.id === i);
       if (!there){
         notes.push(new Note(note.midi, note.velocity*128, i));
@@ -139,14 +137,12 @@ function playFromFile(){
     }
     if (tick > note.ticks + note.durationTicks){
       removeNote(i);
-      //nn.splice(i, 1);
     }
     // todo calculate persise factor
     tick+=0.025;
   }
   if(sus && sus[0] && tick >= sus[0].ticks){
     sustain = sus[0].value === 0? false : true;
-    //console.log(sus[0].ticks)
     sus.shift()
   }
   pop()
@@ -161,9 +157,7 @@ function draw() {
   if(show){
     playFromFile();
   }
-  //notes = notes.filter(n => !n.silent);
   for (let note of notes) {
-
     note.draw();
     note.update();
   }
@@ -173,6 +167,7 @@ let tmp =0;
 function keyPressed() {
   if (key === 's') {
     show = !show;
+    notes = [];
     tmp = millis()
   }
   if (key === 'f' || key === 'F') {
@@ -183,6 +178,9 @@ function keyPressed() {
   }
   if (key === 'c' || key === 'C') {
     notes = [];
+  }
+  if( key === 'd' || key === 'D'){
+    saveCanvas();
   }
 }
 
@@ -211,77 +209,3 @@ async function handleFile(file) {
     console.log('Please upload a valid MIDI file.');
   }
 }
-
-// map midi keys from 35-81
-// ticks mean when the note starts
-// durationTicks means how long the note lasts 
-
-
-// Example MIDI track structure
-// {
-//   "name": "C Major Scale Test",
-//   "notes": [
-//     {
-//       "midi": 60,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 0,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 62,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 96,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 64,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 192,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 65,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 288,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 67,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 384,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 69,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 480,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 71,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 576,
-//       "durationTicks": 96
-//     },
-//     {
-//       "midi": 72,
-//       "velocity": 1,
-//       "noteOffVelocity": 0.5039370078740157,
-//       "ticks": 672,
-//       "durationTicks": 96
-//     }
-//   ],
-//   "pitchBends": [],
-//   "instrument": {
-//     "number": 0
-//   },
-//   "channel": 0,
-//   "endOfTrackTicks": 768
-// }
