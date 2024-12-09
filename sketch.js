@@ -43,6 +43,7 @@ function setup() {
   }
   fileInput = createFileInput(handleFile);
   fileInput.hide();
+  background(0);
 }
 
 function onMIDISuccess(midi) {
@@ -152,7 +153,7 @@ function playFromFile(){
 }
 
 function draw() {
-  background(0,0,0);
+  background(0,0,0, 0.1);
   if(toggleHelp){
     help();
   }
@@ -160,7 +161,7 @@ function draw() {
   if(show){
     playFromFile();
   }
-  notes = notes.filter(n => !n.silent);
+  //notes = notes.filter(n => !n.silent);
   for (let note of notes) {
 
     note.draw();

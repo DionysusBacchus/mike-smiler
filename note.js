@@ -82,11 +82,14 @@ class Note {
     }
   
     draw() {
-      if (this.silent) return;
+      //if (this.silent) return;
       push();
       let c = color(this.hue, 80, this.value);
       if (this.isFading()) {
         c.setAlpha(this.fade/100);
+      }
+      if (this.silent){
+        c.setAlpha(0.01);
       }
       fill(c);
       if (this.note > 36){
