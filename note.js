@@ -10,6 +10,7 @@ const positionSensitivity = 1.5;
 const positionOffset = 2;
 
 class Note {
+  static interval = 12;
     constructor(note, velocity, id ) {
       console.log(note)
       this.note = (note - 28)+4;
@@ -29,8 +30,13 @@ class Note {
       this.silent = false;
       this.fade = -1;
   
-      const interval = 12;
-        const octave = Math.floor(this.note/interval);
+      this.hue = this.calculateHue(this.note);
+      this.value = map(this.note%Note.interval, 0, Note.interval-1, 50, 80);
+    }
+
+    calculateHue(note){
+      const octave = Math.floor(note/Note.interval);
+      console.log(octave)
         // 5 == 50
         // 4 == 0
         // 3 == 330
@@ -40,32 +46,22 @@ class Note {
         //230-250
         switch(octave){
             case 0:
-                console.log(this.note)
-                this.hue =  map(this.note, 4, 11, 230, 240)
-                break;
+                console.log(note)
+                return map(note, 4, 11, 230, 240)
             case 1:
-                this.hue =  250;
-                break;
+                return 250;
             case 2:
-                this.hue =  280;
-                break;
+                return 280;
             case 3:
-                this.hue =  330;
-                break;
+                return 330;
             case 4:
-                this.hue =  0;
-                break;
+                return 0;
             case 6:
             case 5:
-                this.hue =  map(this.note, 48, 67, 40, 55)
-                break;
+                return map(note, 48, 67, 40, 55)
             default:
-                this.hue =  map(Math.round(this.note/interval), 0, 5, 330,0);
-                break;
+                return map(Math.round(note/Note.interval), 0, 5, 330,0);
         }
-        console.log(this.note)
-        console.log(octave)
-        this.value = map(this.note%interval, 0, interval-1, 50, 80);
     }
   
     update() {
