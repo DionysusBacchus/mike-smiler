@@ -168,6 +168,7 @@ function keyPressed() {
   if (key === 's') {
     show = !show;
     notes = [];
+    background(0);
     tmp = millis()
   }
   if (key === 'f' || key === 'F') {

@@ -9,6 +9,9 @@ const sizeOffset = 1;
 const positionSensitivity = 1.5;
 const positionOffset = 2;
 
+//  todo fade in ??
+// todo white background for tisk
+
 class Note {
   static interval = 12;
     constructor(note, velocity, id ) {
@@ -35,6 +38,8 @@ class Note {
     }
 
     calculateHue(note){
+      const x = map(note, 4, 79, 0, 214);
+      return (Math.round(x)+223)%360;
       const octave = Math.floor(note/Note.interval);
       console.log(octave)
         // 5 == 50
