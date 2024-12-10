@@ -84,12 +84,12 @@ class Note {
     updatePos(){
       const d = this.pos.dist(createVector(width/2, height/2));
       if(d < width/3){
-const nScale = 0.005
+      const nScale = 0.003
       
       let dx = nScale*this.pos.x
       let dy = nScale*this.pos.y
       
-      let nValue = noise(dx, dy,(-millis()/3000)%12)
+      let nValue = map(noise(dx, dy,(-millis()/3000)%12), 0, 1, -1, 1)
       
       let ang = nValue * TWO_PI
       
@@ -108,7 +108,7 @@ const nScale = 0.005
         c.setAlpha(this.fade/100);
       }
       if (this.silent){
-        c.setAlpha(0.01);
+        c.setAlpha(0.03);
       }
       fill(c);
       if (this.note > 36){
