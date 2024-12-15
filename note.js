@@ -9,13 +9,14 @@ const sizeOffset = 1;
 const positionSensitivity = 1.5;
 const positionOffset = 2;
 
+const sizeMultiplier = 10;
+
 //  todo fade in ??
 // todo white background for tisk
 
 class Note {
   static interval = 12;
     constructor(note, velocity, id ) {
-      console.log(note)
       this.note = (note - 28)+4;
       this.id = id?? note;
       
@@ -40,33 +41,6 @@ class Note {
     calculateHue(note){
       const x = map(note, 4, 79, 0, 214);
       return (Math.round(x)+223)%360;
-      const octave = Math.floor(note/Note.interval);
-      console.log(octave)
-        // 5 == 50
-        // 4 == 0
-        // 3 == 330
-        // 2 == 280
-        // 1 == 230
-        // 0 == 180
-        //230-250
-        switch(octave){
-            case 0:
-                console.log(note)
-                return map(note, 4, 11, 230, 240)
-            case 1:
-                return 250;
-            case 2:
-                return 280;
-            case 3:
-                return 330;
-            case 4:
-                return 0;
-            case 6:
-            case 5:
-                return map(note, 48, 67, 40, 55)
-            default:
-                return map(Math.round(note/Note.interval), 0, 5, 330,0);
-        }
     }
   
     update() {
@@ -87,31 +61,35 @@ class Note {
     }
   
     draw() {
-      //if (this.silent) return;
       push();
       let c = color(this.hue, 80, this.value);
+      if (this.silent){
+        c.setAlpha(0.01);
+        buffer.fill(c);
+        this.drawShape(buffer)
+        return;
+      }
       if (this.isFading()) {
         c.setAlpha(this.fade/100);
       }
-      if (this.silent){
-        c.setAlpha(0.01);
-      }
       fill(c);
-      if (this.note > 36){
-        this.drawCircle()
-      }
-      else{
-        this.drawSquare()
-      }
+      this.drawShape()
       pop();
     }
-  
-    drawCircle(){
-      circle(this.pos.x, this.pos.y, 10 * this.size);
+
+    drawShape(buffer){
+      if (this.note > 36){
+        const circle_fun = buffer? buffer.circle : circle;
+        circle_fun(this.pos.x, this.pos.y, this.trueSize());
+      }
+      else{
+        const rect_fun = buffer? buffer.rect : rect;
+        rect_fun(this.pos.x, this.pos.y, this.trueSize(), this.trueSize(), 10);
+      }
     }
-  
-    drawSquare(){
-      rect(this.pos.x, this.pos.y, 10 * this.size, 10 * this.size, 10);
+
+    trueSize(){
+      return sizeMultiplier * this.size;
     }
   
     makeSilent() {

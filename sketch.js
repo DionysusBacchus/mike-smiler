@@ -7,6 +7,8 @@ let toggleHelp = false;
 let liveText;
 const liveError = '\nCan\'t start the live stream mode!';
 
+let buffer;
+
 function help(){
   text(liveText, width / 2, lineGap);
 
@@ -21,15 +23,19 @@ function help(){
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
+  noStroke();
+  colorMode(HSL)
   rectMode(CENTER);
+
+  buffer = createGraphics(width, height);
+  buffer.noStroke();
+  buffer.colorMode(HSL);
+  buffer.rectMode(CENTER);
 
   lineGap = height / 5;
   textSize(16);
   textAlign(CENTER, CENTER);
   fill(100,100,100);
-  noStroke();
-  colorMode(HSL)
 
   speedRange = createVector(1, 5);
   sizeRange = createVector(1, 8);
@@ -149,6 +155,7 @@ function playFromFile(){
 }
 
 function draw() {
+  image(buffer, 0, 0);
   background(0,0,0, 0.1);
   if(toggleHelp){
     help();
@@ -157,9 +164,10 @@ function draw() {
   if(show){
     playFromFile();
   }
+  notes = notes.filter(n => !n.silent);
   for (let note of notes) {
-    note.draw();
     note.update();
+    note.draw();
   }
 }
 let tmp =0;
