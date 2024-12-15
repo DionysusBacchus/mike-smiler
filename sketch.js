@@ -21,16 +21,20 @@ function help(){
   text('Press "f" to upload a MIDI file', width / 2, lineGap * 4);
 }
 
+function resetBuffer(){
+  buffer = createGraphics(windowWidth, windowHeight);
+  buffer.noStroke();
+  buffer.colorMode(HSL);
+  buffer.rectMode(CENTER);
+}
+
 function setup() {
   createCanvas(windowWidth, windowHeight);
   noStroke();
   colorMode(HSL)
   rectMode(CENTER);
 
-  buffer = createGraphics(width, height);
-  buffer.noStroke();
-  buffer.colorMode(HSL);
-  buffer.rectMode(CENTER);
+  resetBuffer();
 
   lineGap = height / 5;
   textSize(16);
@@ -177,6 +181,7 @@ function keyPressed() {
     show = !show;
     notes = [];
     background(0);
+    resetBuffer();
     tmp = millis()
   }
   if (key === 'f' || key === 'F') {
@@ -187,6 +192,8 @@ function keyPressed() {
   }
   if (key === 'c' || key === 'C') {
     notes = [];
+    resetBuffer();
+    background(0);
   }
   if( key === 'd' || key === 'D'){
     saveCanvas();
