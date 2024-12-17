@@ -20,7 +20,8 @@ class Note {
       this.note = (note - 28)+4;
       this.id = id?? note;
       
-      this.vel = createVector(random(-1, 1), random(-1, 1));
+      this.vel = createVector(0, 1);
+      this.vel.rotate(random(TWO_PI));
 
       this.pos = createVector(width/2, height/2);
       const offset = -(this.note*positionSensitivity)+positionOffset;
@@ -78,13 +79,17 @@ class Note {
     }
 
     drawShape(buffer){
+      const d = this.pos.dist(createVector(width/2, height/2));
+      const off = sin(d/this.speed/10)*this.size;
+      const norm = p5.Vector.rotate(this.vel, PI/2).setMag(off);
+      const pos = this.pos.copy().add(norm);
       if (this.note > 36){
         const circle_fun = buffer? buffer.circle : circle;
-        circle_fun(this.pos.x, this.pos.y, this.trueSize());
+        circle_fun(pos.x, pos.y, this.trueSize());
       }
       else{
         const rect_fun = buffer? buffer.rect : rect;
-        rect_fun(this.pos.x, this.pos.y, this.trueSize(), this.trueSize(), 10);
+        rect_fun(pos.x, pos.y, this.trueSize(), this.trueSize(), 10);
       }
     }
 
