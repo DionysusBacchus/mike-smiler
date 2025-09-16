@@ -225,3 +225,23 @@ async function handleFile(file) {
     console.log('Please upload a valid MIDI file.');
   }
 }
+
+// --- Native USB-MIDI bridge (for Capacitor/Cordova wrappers) ---
+// Allows native code to call window.mikeSmilerNativeMidi(status, data1, data2)
+// or dispatch a CustomEvent('nativeMIDI', { detail: { status, data1, data2 } })
+// to feed live MIDI into the same visualization pipeline.
+if (typeof window !== 'undefined'){
+  window.mikeSmilerNativeMidi = function(status, data1, data2){
+    try{
+      handleMIDIMessage({ data: [status|0, data1|0, data2|0] });
+    }catch(e){
+      console.error('Native MIDI bridge error:', e);
+    }
+  };
+  window.addEventListener('nativeMIDI', function(e){
+    const d = (e && e.detail) || {};
+    if (typeof d.status === 'number'){
+      window.mikeSmilerNativeMidi(d.status, d.data1||0, d.data2||0);
+    }
+  });
+}
